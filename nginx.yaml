@@ -5,7 +5,7 @@ metadata:
   labels:
     app: nginx
 spec:
-  replicas: 1 # 希望运行的 Pod 副本数量，可以根据需要修改
+  replicas: 2 # 希望运行的 Pod 副本数量，可以根据需要修改
   selector:
     matchLabels:
       app: nginx # Deployment 通过这个标签选择它管理的 Pods
