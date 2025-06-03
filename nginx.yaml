@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 1 # 希望运行的 Pod 副本数量，可以根据需要修改
+  selector:
+    matchLabels:
+      app: nginx # Deployment 通过这个标签选择它管理的 Pods
+  strategy:
+    type: RollingUpdate # 默认的更新策略，灰度更新
+    rollingUpdate:
+      maxUnavailable: 1 # 更新过程中最多有多少个 Pod 不可用
+      maxSurge: 1 # 更新过程中最多可以创建多少个额外的 Pod
+  template:
+    metadata:
+      labels:
+        app: nginx # 这是 Pod 的标签，必须与 spec.selector.matchLabels 匹配
+    spec:
+      containers:
+      - name: nginx # 容器的名称
+        image: nginx:stable # 使用的 Nginx 镜像，推荐使用特定的版本标签而不是 latest
+        imagePullPolicy: IfNotPresent # 镜像拉取策略：IfNotPresent, Always, Never
+        ports:
+        - containerPort: 80 # 容器暴露的端口
+          name: http # 端口名称 (可选，但推荐)
+        resources: # 定义容器的资源请求和限制
+          requests: # 调度器根据请求值进行调度
+            cpu: 10m # 请求 0.1 个 CPU 核心
+            memory: 128Mi # 请求 128 MiB 内存
+          limits: # 容器不能超过的资源上限
+            cpu: 200m # 限制 0.2 个 CPU 核心
+            memory: 256Mi # 限制 256 MiB 内存
+        # livenessProbe 和 readinessProbe (健康检查) 非常重要，生产环境强烈建议添加
+        # 例如：
+        # livenessProbe:
+        #   httpGet:
+        #     path: / # 检查根路径
+        #     port: http # 或者直接写 80
+        #   initialDelaySeconds: 10 # 容器启动后延迟多久开始检查
+        #   periodSeconds: 10 # 每隔多久执行一次检查
+        # readinessProbe:
+        #   httpGet:
+        #     path: /
+        #     port: http
+        #   initialDelaySeconds: 5
+        #   periodSeconds: 5
